@@ -9,7 +9,7 @@ en:
       delete: "Delete this message"
       confirm_delete: "Delete this message? This cannot be undone."
       reply: "Reply to @{{username}}"
-      count: "{{count}}/{{max}}"
+      count: "{{current}}/{{max}}"
       empty: "No messages yet — be the first!"
       load_failed: "Failed to load messages"
       send_failed: "Failed to send, please try again"

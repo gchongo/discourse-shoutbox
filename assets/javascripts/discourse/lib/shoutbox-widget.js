@@ -502,8 +502,10 @@ function renderFoot(widget) {
   const meta = el("div", "shoutbox__composer-meta");
   const count = el("span", "shoutbox__count");
   const updateCount = () => {
+    // NB: don't name the option "count" — that makes Discourse's i18n look
+    // for pluralized key variants (shoutbox.count.one/other).
     count.textContent = i18n("shoutbox.count", {
-      count: ta.value.length,
+      current: ta.value.length,
       max: ta.maxLength,
     });
   };
