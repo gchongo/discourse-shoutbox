@@ -1,0 +1,420 @@
+// Shoutbox message board. Styled exclusively with core CSS variables so it
+// adapts to any color scheme (including the jtech dark theme) without
+// theme-specific overrides.
+.shoutbox {
+  --shoutbox-border: var(--primary-low);
+  --shoutbox-radius: 0.75em;
+
+  display: flex;
+  flex-direction: column;
+  background: var(--secondary);
+  border: 1px solid var(--shoutbox-border);
+  border-radius: var(--shoutbox-radius);
+  overflow: hidden;
+}
+
+// ── head ─────────────────────────────────────────────────────────────────────
+.shoutbox__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5em;
+  padding: 0.6em 0.85em;
+  background: var(--tertiary-low);
+  border-bottom: 1px solid var(--shoutbox-border);
+}
+
+.shoutbox__title {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.shoutbox__open {
+  font-size: var(--font-down-1);
+  color: var(--tertiary);
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--tertiary-hover, var(--tertiary));
+    text-decoration: none;
+  }
+}
+
+// ── list ─────────────────────────────────────────────────────────────────────
+.shoutbox__list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25em 0;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 6em;
+
+  .shoutbox--panel & {
+    height: var(--shoutbox-panel-height, 220px);
+  }
+
+  .shoutbox--page & {
+    height: calc(100dvh - var(--header-offset, 4em) - 180px);
+    min-height: 16em;
+  }
+}
+
+.shoutbox__msg {
+  padding: 1em;
+  text-align: center;
+  color: var(--primary-medium);
+}
+
+@keyframes shoutbox-new {
+  from {
+    background: var(--tertiary-low);
+  }
+  to {
+    background: transparent;
+  }
+}
+
+.shoutbox__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6em;
+  padding: 0.5em 0.85em;
+  border-bottom: 1px solid var(--primary-very-low);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &--new {
+    animation: shoutbox-new 2.5s ease-out;
+  }
+}
+
+.shoutbox__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.shoutbox__main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shoutbox__meta-line {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5em;
+}
+
+.shoutbox__name {
+  font-weight: bold;
+  font-size: var(--font-down-1);
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+    color: var(--tertiary);
+  }
+}
+
+.shoutbox__time {
+  font-size: var(--font-down-2);
+  color: var(--primary-medium);
+  white-space: nowrap;
+}
+
+.shoutbox__text {
+  margin-top: 0.15em;
+  color: var(--primary);
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  .shoutbox--page & {
+    -webkit-line-clamp: unset;
+    overflow: visible;
+  }
+}
+
+.shoutbox__emoji {
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: -0.25em;
+}
+
+.shoutbox__link {
+  color: var(--tertiary);
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.shoutbox__mention {
+  color: var(--tertiary);
+  font-weight: bold;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+// ── row actions ──────────────────────────────────────────────────────────────
+.shoutbox__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25em;
+  flex-shrink: 0;
+}
+
+.shoutbox__action {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--primary-low-mid);
+  cursor: pointer;
+  padding: 0 0.25em;
+  font-size: var(--font-down-2);
+  line-height: 1.2;
+
+  &:hover {
+    color: var(--primary);
+  }
+
+  &--delete:hover {
+    color: var(--danger);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}
+
+// ── composer ─────────────────────────────────────────────────────────────────
+.shoutbox__foot {
+  border-top: 1px solid var(--shoutbox-border);
+  padding: 0.5em 0.6em;
+  background: var(--secondary);
+}
+
+.shoutbox__composer-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.4em;
+  position: relative;
+}
+
+.shoutbox__composer {
+  flex: 1 1 auto;
+  resize: none;
+  min-height: 2.2em;
+  max-height: 6em;
+  padding: 0.5em 0.65em;
+  border: 1px solid var(--primary-medium);
+  border-radius: 0.5em;
+  background: var(--primary-very-low);
+  color: var(--primary);
+  font-size: var(--font-0);
+
+  &:focus {
+    outline: none;
+    border-color: var(--tertiary);
+  }
+}
+
+.shoutbox__composer-btn {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--primary-medium);
+  cursor: pointer;
+  padding: 0.35em 0.45em;
+  border-radius: 0.4em;
+  flex-shrink: 0;
+  font-size: var(--font-up-1);
+
+  &:hover {
+    color: var(--tertiary);
+    background: var(--primary-very-low);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .d-icon {
+    width: 1em;
+    height: 1em;
+  }
+}
+
+.shoutbox__send {
+  color: var(--secondary);
+  background: var(--tertiary);
+
+  &:hover {
+    color: var(--secondary);
+    background: var(--tertiary-hover, var(--tertiary));
+  }
+}
+
+.shoutbox__composer-meta {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0.2em;
+}
+
+.shoutbox__count {
+  font-size: var(--font-down-2);
+  color: var(--primary-medium);
+}
+
+.shoutbox__login {
+  display: block;
+  text-align: center;
+  padding: 0.4em;
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+
+  &:hover {
+    text-decoration: none;
+    color: var(--tertiary);
+  }
+}
+
+// ── popovers ─────────────────────────────────────────────────────────────────
+.shoutbox__popovers {
+  position: relative;
+}
+
+.shoutbox__emoji-pop {
+  position: absolute;
+  bottom: 4em;
+  left: 0.6em;
+  z-index: z("dropdown") + 1;
+  display: grid;
+  grid-template-columns: repeat(8, 2em);
+  gap: 2px;
+  padding: 0.5em;
+  max-width: calc(100% - 1.2em);
+  max-height: 12em;
+  overflow-y: auto;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low-mid);
+  border-radius: 0.5em;
+  box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+}
+
+.shoutbox__emoji-option {
+  width: 1.6em;
+  height: 1.6em;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.2);
+  }
+}
+
+.shoutbox__mention-pop {
+  position: absolute;
+  bottom: 4em;
+  left: 3.2em;
+  right: 0.6em;
+  z-index: z("dropdown") + 1;
+  background: var(--secondary);
+  border: 1px solid var(--primary-low-mid);
+  border-radius: 0.5em;
+  box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+  overflow: hidden;
+}
+
+.shoutbox__mention-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.5em 0.7em;
+  border: none;
+  border-bottom: 1px solid var(--primary-very-low);
+  background: transparent;
+  color: var(--primary);
+  text-align: left;
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover,
+  &.is-active {
+    background: var(--tertiary-low);
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  span {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+
+    b {
+      font-size: var(--font-down-1);
+    }
+
+    small {
+      font-size: var(--font-down-2);
+      color: var(--primary-medium);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}
+
+// ── homepage panel placement ─────────────────────────────────────────────────
+.shoutbox-home-panel {
+  margin-bottom: 1.5em;
+}
+
+// ── full page ────────────────────────────────────────────────────────────────
+.shoutbox-page-wrap {
+  max-width: 46em;
+  margin: 1em auto 2em;
+
+  .shoutbox--page {
+    min-height: 70dvh;
+  }
+}
+
+// ── mobile ───────────────────────────────────────────────────────────────────
+.mobile-view {
+  .shoutbox-home-panel {
+    margin: 0.75em 0.5em;
+  }
+
+  .shoutbox__list,
+  .shoutbox--page .shoutbox__list {
+    height: 200px;
+  }
+
+  .shoutbox__emoji-pop {
+    grid-template-columns: repeat(6, 2em);
+  }
+}

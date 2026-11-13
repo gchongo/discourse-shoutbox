@@ -1,0 +1,11 @@
+en:
+  site_settings:
+    shoutbox_enabled: "Enable the shoutbox message board."
+    shoutbox_anonymous_view: "Anonymous visitors can read the message board."
+    shoutbox_sidebar_link: "Show a Message Board link in the sidebar community section."
+    shoutbox_homepage_panel: "Show the message board panel above the homepage topic list."
+    shoutbox_min_trust_level: "Minimum trust level required to post messages."
+    shoutbox_max_length: "Maximum length of a message."
+    shoutbox_messages_displayed: "Number of messages shown in the board."
+    shoutbox_max_stored: "Maximum number of messages stored (oldest are pruned)."
+    shoutbox_rate_limit_per_minute: "How many messages a user can post per minute."

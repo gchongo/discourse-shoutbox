@@ -1,0 +1,23 @@
+en:
+  js:
+    shoutbox:
+      title: "Message Board"
+      open: "Open"
+      placeholder: "Say something…"
+      publish: "Post"
+      posting: "Posting…"
+      delete: "Delete this message"
+      confirm_delete: "Delete this message? This cannot be undone."
+      reply: "Reply to @{{username}}"
+      count: "{{count}}/{{max}}"
+      empty: "No messages yet — be the first!"
+      load_failed: "Failed to load messages"
+      send_failed: "Failed to send, please try again"
+      too_long: "Message is too long"
+      login_required: "Log in to post"
+      login_prompt: "Log in to join the conversation"
+      rate_limited: "You are posting too fast, please slow down"
+      not_allowed: "You are not allowed to post here"
+      emoji_picker: "Emoji"
+      external_link: "External link"
+      topic_link: "Open topic"
