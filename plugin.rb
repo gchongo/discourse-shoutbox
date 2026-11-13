@@ -27,10 +27,12 @@ register_svg_icon "xmark"
 register_svg_icon "arrow-up-right-from-square"
 
 after_initialize do
+  # Paths are relative to this plugin.rb (require_relative "…/app/..." with a
+  # leading ../ would escape the plugin directory).
   %w[
-    ../app/models/shoutbox_message
-    ../app/serializers/shoutbox_message_serializer
-    ../app/controllers/discourse_shoutbox/shoutbox_messages_controller
+    app/models/shoutbox_message
+    app/serializers/shoutbox_message_serializer
+    app/controllers/discourse_shoutbox/shoutbox_messages_controller
   ].each { |path| require_relative path }
 
   DiscourseShoutbox::Engine.routes.draw do
