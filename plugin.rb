@@ -17,8 +17,6 @@ module ::DiscourseShoutbox
   MESSAGE_BUS_CHANNEL = "/shoutbox"
 end
 
-require_relative "lib/discourse_shoutbox/engine"
-
 register_asset "stylesheets/common/shoutbox.scss"
 
 register_svg_icon "paper-plane"
@@ -35,17 +33,18 @@ after_initialize do
     app/controllers/discourse_shoutbox/shoutbox_messages_controller
   ].each { |path| require_relative path }
 
-  DiscourseShoutbox::Engine.routes.draw do
-    # HTML requests for "/" serve the Ember app shell (the frontend route-map
-    # registers the /shoutbox page); JSON requests return the message list.
-    get "/" => "shoutbox_messages#index"
-    get "/messages" => "shoutbox_messages#index", defaults: { format: :json }
-    post "/messages" => "shoutbox_messages#create", defaults: { format: :json }
-    delete "/messages/:id" => "shoutbox_messages#destroy", defaults: { format: :json }
-  end
-
+  # Plain scoped routes instead of a mounted Rails engine — mounting engines
+  # from a plugin's after_initialize breaks (jtechtools hit the same
+  # "Invalid route name, already in use" and switched to this pattern).
   Discourse::Application.routes.append do
-    mount DiscourseShoutbox::Engine, at: "/shoutbox", as: "discourse_shoutbox"
+    scope "shoutbox", module: "discourse_shoutbox", as: "shoutbox" do
+      # HTML requests for "/" serve the Ember app shell (the frontend route-map
+      # registers the /shoutbox page); JSON requests return the message list.
+      get "/" => "shoutbox_messages#index"
+      get "/messages" => "shoutbox_messages#index", defaults: { format: :json }
+      post "/messages" => "shoutbox_messages#create", defaults: { format: :json }
+      delete "/messages/:id" => "shoutbox_messages#destroy", defaults: { format: :json }
+    end
   end
 
   add_to_class(:guardian, :can_post_shoutbox?) do
