@@ -514,7 +514,7 @@ function renderFoot(widget) {
   meta.appendChild(count);
   foot.appendChild(meta);
 
-  const emojiPop = rootEl.querySelector(".shoutbox__emoji-pop");
+  const emojiPop = widget.rootEl.querySelector(".shoutbox__emoji-pop");
   emojiBtn.addEventListener("click", () => {
     emojiPop.hidden = !emojiPop.hidden;
     if (emojiPop.hidden) {
@@ -547,7 +547,7 @@ function renderFoot(widget) {
     }
   });
 
-  const mentionPop = rootEl.querySelector(".shoutbox__mention-pop");
+  const mentionPop = widget.rootEl.querySelector(".shoutbox__mention-pop");
   let mentionSeq = 0;
   let mentionItems = [];
   let mentionIndex = -1;
