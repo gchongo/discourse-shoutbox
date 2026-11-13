@@ -1,30 +1,31 @@
-shoutbox_enabled:
-  default: true
-  client: true
-shoutbox_anonymous_view:
-  default: true
-shoutbox_sidebar_link:
-  default: true
-  client: true
-shoutbox_homepage_panel:
-  default: true
-  client: true
-shoutbox_min_trust_level:
-  default: 0
-  enum: "TrustLevelSetting"
-shoutbox_max_length:
-  default: 200
-  min: 20
-  max: 500
-shoutbox_messages_displayed:
-  default: 30
-  min: 10
-  max: 100
-shoutbox_max_stored:
-  default: 1000
-  min: 100
-  max: 100000
-shoutbox_rate_limit_per_minute:
-  default: 5
-  min: 1
-  max: 60
+shoutbox:
+  shoutbox_enabled:
+    default: true
+    client: true
+  shoutbox_anonymous_view:
+    default: true
+  shoutbox_sidebar_link:
+    default: true
+    client: true
+  shoutbox_homepage_panel:
+    default: true
+    client: true
+  shoutbox_min_trust_level:
+    default: 0
+    enum: "TrustLevelSetting"
+  shoutbox_max_length:
+    default: 200
+    min: 20
+    max: 500
+  shoutbox_messages_displayed:
+    default: 30
+    min: 10
+    max: 100
+  shoutbox_max_stored:
+    default: 1000
+    min: 100
+    max: 100000
+  shoutbox_rate_limit_per_minute:
+    default: 5
+    min: 1
+    max: 60
