@@ -8,7 +8,7 @@ import { i18n } from "discourse-i18n";
 import { mountShoutbox, unmountShoutbox } from "../lib/shoutbox-widget";
 
 const HOME_PATHS = new Set(["/", "/latest", "/categories"]);
-const mounted = new WeakMap(); // mount element → widget handle
+const mounted = new Map(); // mount element → widget handle (Map: iterated for cleanup)
 let homeWidget = null;
 let scanQueued = false;
 
