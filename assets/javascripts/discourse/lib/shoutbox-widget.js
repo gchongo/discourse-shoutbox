@@ -7,7 +7,7 @@
 // MessageBus "/shoutbox" pushes live creates/deletes to every mounted widget,
 // and a 60s catch-up poll guards against a dropped bus message.
 import { ajax } from "discourse/lib/ajax";
-import { iconHTML } from "discourse-common/lib/icon-library";
+import { iconHTML } from "discourse/lib/icon-library";
 import { i18n } from "discourse-i18n";
 import { relativeAge } from "discourse/lib/formatter";
 
@@ -52,43 +52,49 @@ const loadMessages = (afterId = 0) => {
       widgets.forEach((w) => w.refresh({ animateFromId: afterId > 0 ? afterId : null }));
     })
     .catch(() => {
+      // allow a later mount/poll to retry
+      loading = false;
       widgets.forEach((w) => w.showError());
     });
 };
 
+let busStarted = false;
+
 const startShared = () => {
-  if (loading) {
-    return;
-  }
-  loading = true;
+  if (!busStarted) {
+    busStarted = true;
 
-  const messageBus = container()?.lookup("service:message-bus");
-  if (messageBus) {
-    messageBus.subscribe("/shoutbox", (data) => {
-      if (data?.type === "created" && data.message) {
-        const m = data.message;
-        if (messages.has(m.id)) {
-          return;
+    const messageBus = container()?.lookup("service:message-bus");
+    if (messageBus) {
+      messageBus.subscribe("/shoutbox", (data) => {
+        if (data?.type === "created" && data.message) {
+          const m = data.message;
+          if (messages.has(m.id)) {
+            return;
+          }
+          messages.set(m.id, m);
+          lastSeenId = Math.max(lastSeenId, m.id);
+          widgets.forEach((w) => w.appendRow(m, { isNew: true }));
+        } else if (data?.type === "deleted" && messages.has(data.id)) {
+          messages.delete(data.id);
+          widgets.forEach((w) => w.removeRow(data.id));
         }
-        messages.set(m.id, m);
-        lastSeenId = Math.max(lastSeenId, m.id);
-        widgets.forEach((w) => w.appendRow(m, { isNew: true }));
-      } else if (data?.type === "deleted" && messages.has(data.id)) {
-        messages.delete(data.id);
-        widgets.forEach((w) => w.removeRow(data.id));
-      }
-    });
+      });
+    }
+
+    if (!pollTimer) {
+      pollTimer = setInterval(() => {
+        if (document.visibilityState === "visible") {
+          catchUp();
+        }
+      }, 60_000);
+    }
   }
 
-  if (!pollTimer) {
-    pollTimer = setInterval(() => {
-      if (document.visibilityState === "visible") {
-        catchUp();
-      }
-    }, 60_000);
+  if (!loading && !loaded) {
+    loading = true;
+    loadMessages();
   }
-
-  loadMessages();
 };
 
 // ── rich text rendering ──────────────────────────────────────────────────────
@@ -214,7 +220,8 @@ const appendTextWithEmoji = (parent, text) => {
       img.title = part;
       img.loading = "lazy";
       parent.appendChild(img);
-    } else if (!m || !emojiMap) {
+    } else {
+      // plain text, or an emoji code the site doesn't know
       appendTextWithMentions(parent, part);
     }
   });
@@ -291,11 +298,12 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
   rootEl.appendChild(buildPopovers(widget));
 
   widget.refresh = ({ animateFromId = null } = {}) => {
-    const cutoff = animateFromId ?? 0;
+    // initial load (null) never animates; catch-up animates what's new
+    const cutoff = animateFromId === null ? Infinity : animateFromId;
     widget.els.list.replaceChildren();
     let last = null;
     for (const m of messages.values()) {
-      const animate = m.id > cutoff && m.id > lastSeenId;
+      const animate = m.id > cutoff;
       widget.els.list.appendChild(buildRow(widget, m, { animate }));
       last = m;
     }
@@ -307,12 +315,12 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
     scrollToBottom(widget);
   };
 
-  widget.appendRow = (m, { isNew = false } = {}) => {
+  widget.appendRow = (m, { isNew = false, forceScroll = false } = {}) => {
     hideEmptyState(widget);
     const animate = isNew && m.id > lastSeenId;
     lastSeenId = Math.max(lastSeenId, m.id);
     widget.els.list.appendChild(buildRow(widget, m, { animate }));
-    scrollToBottom(widget);
+    scrollToBottom(widget, forceScroll);
   };
 
   widget.removeRow = (id) => {
@@ -347,7 +355,7 @@ export function unmountShoutbox(widget) {
 
 // ── pieces ───────────────────────────────────────────────────────────────────
 
-function buildRow(widget, m, { animate = false, silent = false } = {}) {
+function buildRow(widget, m, { animate = false } = {}) {
   const li = el("li", "shoutbox__item");
   li.dataset.id = m.id;
   if (animate) {
@@ -419,17 +427,16 @@ function buildRow(widget, m, { animate = false, silent = false } = {}) {
   }
   li.appendChild(actions);
 
-  if (silent) {
-    // bulk render: keep the list append-only, caller scrolls once
-    li.classList.remove("shoutbox__item--new");
-  }
   return li;
 }
 
-function scrollToBottom(widget) {
+function scrollToBottom(widget, force = false) {
   const list = widget.els.list;
   requestAnimationFrame(() => {
-    list.scrollTop = list.scrollHeight;
+    const nearBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 80;
+    if (force || nearBottom) {
+      list.scrollTop = list.scrollHeight;
+    }
   });
 }
 
@@ -445,6 +452,14 @@ function hideEmptyState(widget) {
 
 function renderFoot(widget) {
   const foot = widget.els.foot;
+
+  // Rebuilding the composer on every poll would wipe drafts mid-typing — only
+  // rebuild when the viewer's capabilities actually change.
+  const sig = viewer ? `${viewer.signed_in}|${viewer.can_post}|${viewer.max_length}` : "";
+  if (widget.els.footSig === sig) {
+    return;
+  }
+  widget.els.footSig = sig;
   foot.replaceChildren();
 
   if (viewer && !viewer.signed_in) {
@@ -654,7 +669,7 @@ function submit(widget) {
       if (payload?.message && !messages.has(payload.message.id)) {
         messages.set(payload.message.id, payload.message);
         lastSeenId = Math.max(lastSeenId, payload.message.id);
-        widgets.forEach((w) => w.appendRow(payload.message, { isNew: true }));
+        widgets.forEach((w) => w.appendRow(payload.message, { isNew: true, forceScroll: true }));
       }
     })
     .catch((err) => {

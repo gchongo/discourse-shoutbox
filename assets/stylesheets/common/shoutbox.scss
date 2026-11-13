@@ -5,6 +5,7 @@
   --shoutbox-border: var(--primary-low);
   --shoutbox-radius: 0.75em;
 
+  position: relative;
   display: flex;
   flex-direction: column;
   background: var(--secondary);
@@ -293,7 +294,7 @@
 
 // ── popovers ─────────────────────────────────────────────────────────────────
 .shoutbox__popovers {
-  position: relative;
+  position: static;
 }
 
 .shoutbox__emoji-pop {

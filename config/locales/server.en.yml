@@ -9,3 +9,5 @@ en:
     shoutbox_messages_displayed: "Number of messages shown in the board."
     shoutbox_max_stored: "Maximum number of messages stored (oldest are pruned)."
     shoutbox_rate_limit_per_minute: "How many messages a user can post per minute."
+  shoutbox:
+    not_allowed: "You are not allowed to post messages here."

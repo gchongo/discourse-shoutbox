@@ -30,7 +30,7 @@ module DiscourseShoutbox
         end
 
       render json: {
-        messages: serialize_data(messages, ShoutboxMessageSerializer),
+        messages: serialize_messages(messages),
         viewer: viewer_payload,
       }
     end
@@ -48,7 +48,7 @@ module DiscourseShoutbox
       message = ShoutboxMessage.new(user: current_user, message: params[:message].to_s.strip, color: sanitize_color)
 
       if message.save
-        serialized = serialize_message(message)
+        serialized = serialize_messages(message)
         MessageBus.publish(
           DiscourseShoutbox::MESSAGE_BUS_CHANNEL,
           { type: "created", message: serialized },
@@ -84,8 +84,15 @@ module DiscourseShoutbox
       }
     end
 
-    def serialize_message(message)
-      serialize_data(message, ShoutboxMessageSerializer, root: false)
+    def serialize_messages(records)
+      list =
+        if records.is_a?(Array) || records.is_a?(ActiveRecord::Relation)
+          records
+        else
+          [records]
+        end
+      result = list.map { |record| ShoutboxMessageSerializer.new(record, scope: guardian, root: false).as_json }
+      records.is_a?(Array) || records.is_a?(ActiveRecord::Relation) ? result : result.first
     end
 
     # Only accept hex color strings; anything else is dropped. Posting with a
