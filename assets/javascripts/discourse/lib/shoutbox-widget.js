@@ -275,8 +275,22 @@ const el = (tag, cls, text) => {
 
 export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
   const widget = { rootEl, variant, els: {}, destroyed: false };
-  rootEl.classList.add("shoutbox");
-  rootEl.classList.add(variant === "page" ? "shoutbox--page" : "shoutbox--panel");
+
+  // Page variant: the host becomes a two-column grid (memos-style) holding
+  // the timeline and a sticky side column of info cards. Panel stays a single
+  // card.
+  let mount;
+  if (variant === "page") {
+    rootEl.classList.add("shoutbox-page-grid");
+    mount = el("div", "shoutbox shoutbox--page");
+    rootEl.appendChild(mount);
+    widget.els.side = el("aside", "shoutbox-side");
+    rootEl.appendChild(widget.els.side);
+  } else {
+    rootEl.classList.add("shoutbox", "shoutbox--panel");
+    mount = rootEl;
+  }
+  widget.mountEl = mount;
 
   // head
   const head = el("div", "shoutbox__head");
@@ -308,7 +322,7 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
     widget.els.plusBtn = plus;
     head.appendChild(plus);
   }
-  rootEl.appendChild(head);
+  mount.appendChild(head);
 
   // list
   const list = el("ul", "shoutbox__list");
@@ -325,13 +339,13 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
     // X-style timeline: composer on top, feed below. The zero-height popovers
     // wrap sits right after the composer so the emoji/mention popovers anchor
     // just underneath it.
-    rootEl.appendChild(foot);
-    rootEl.appendChild(popovers);
-    rootEl.appendChild(list);
+    mount.appendChild(foot);
+    mount.appendChild(popovers);
+    mount.appendChild(list);
   } else {
-    rootEl.appendChild(list);
-    rootEl.appendChild(foot);
-    rootEl.appendChild(popovers);
+    mount.appendChild(list);
+    mount.appendChild(foot);
+    mount.appendChild(popovers);
   }
 
   widget.refresh = ({ animateFromId = null } = {}) => {
@@ -349,6 +363,7 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
     }
     showEmptyStateIfNeeded(widget);
     renderFoot(widget);
+    renderSide(widget);
     scrollToBottom(widget);
   };
 
@@ -357,12 +372,14 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
     const animate = isNew && m.id > lastSeenId;
     lastSeenId = Math.max(lastSeenId, m.id);
     widget.els.list.appendChild(buildRow(widget, m, { animate }));
+    renderSide(widget);
     scrollToBottom(widget, forceScroll);
   };
 
   widget.removeRow = (id) => {
     widget.els.list.querySelector(`[data-id="${id}"]`)?.remove();
     showEmptyStateIfNeeded(widget);
+    renderSide(widget);
   };
 
   widget.showError = () => {
@@ -475,6 +492,58 @@ function scrollToBottom(widget, force = false) {
       list.scrollTop = list.scrollHeight;
     }
   });
+}
+
+// ── side column (page variant, memos-style cards) ────────────────────────────
+function renderSide(widget) {
+  const side = widget.els.side;
+  if (!side) {
+    return;
+  }
+
+  const counts = new Map();
+  for (const m of messages.values()) {
+    const name = m.user?.username;
+    if (!name) {
+      continue;
+    }
+    const entry = counts.get(name) || { user: m.user, count: 0 };
+    entry.count += 1;
+    counts.set(name, entry);
+  }
+  const top = [...counts.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+
+  const active = el("div", "shoutbox-side__card");
+  active.appendChild(el("div", "shoutbox-side__title", i18n("shoutbox.side_active")));
+  if (top.length === 0) {
+    active.appendChild(el("div", "shoutbox-side__text", i18n("shoutbox.empty")));
+  } else {
+    top.forEach(({ user, count }) => {
+      const rowEl = el("div", "shoutbox-side__row");
+      if (user?.avatar_template) {
+        const img = el("img");
+        img.src = user.avatar_template.replace("{size}", "48");
+        img.alt = "";
+        img.loading = "lazy";
+        rowEl.appendChild(img);
+      }
+      const a = makeLink(`/u/${esc(user?.username).toLowerCase()}`, "shoutbox-side__name");
+      a.textContent = esc(user?.username);
+      rowEl.appendChild(a);
+      rowEl.appendChild(
+        el("span", "shoutbox-side__count", i18n("shoutbox.side_count", { n: count })),
+      );
+      active.appendChild(rowEl);
+    });
+  }
+
+  const about = el("div", "shoutbox-side__card");
+  about.appendChild(el("div", "shoutbox-side__title", i18n("shoutbox.title")));
+  about.appendChild(
+    el("p", "shoutbox-side__text", i18n("shoutbox.side_about", { n: messages.size })),
+  );
+
+  side.replaceChildren(active, about);
 }
 
 function showEmptyStateIfNeeded(widget) {
@@ -765,7 +834,7 @@ function buildPopovers(widget) {
   wrap.appendChild(mentionPop);
   wrap.appendChild(composePop);
 
-  widget.rootEl.addEventListener("click", (event) => {
+  widget.mountEl.addEventListener("click", (event) => {
     if (
       !emojiPop.hidden &&
       !event.target.closest(".shoutbox__emoji-pop") &&

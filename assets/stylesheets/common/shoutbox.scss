@@ -11,6 +11,12 @@
   background: var(--secondary);
   border: 1px solid var(--shoutbox-border);
   border-radius: var(--shoutbox-radius);
+  // NB: no overflow:hidden here — it would turn .shoutbox into the sticky
+  // scroll container and push a sticky head DOWN by the header offset.
+}
+
+// Rounded-corner clipping is only needed on the card-style panel variant.
+.shoutbox--panel {
   overflow: hidden;
 }
 
@@ -453,15 +459,95 @@
 // ── full page: X (twitter) style timeline ────────────────────────────────────
 // width: 100% is load-bearing — the wrap can land inside a grid/flex parent
 // (theme sidebar layouts) where a block child would otherwise shrink-to-fit.
+// The host is also the memos-style grid: timeline column + sticky side cards
+// on wide screens, single column with the side hidden below the breakpoint.
 .shoutbox-page-wrap {
   width: 100%;
-  max-width: 38em;
+}
+
+.shoutbox-page-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 38em) 19em;
+  gap: 2em;
+  justify-content: center;
+  align-items: start;
+  max-width: 64em;
   margin: 1em auto 2em;
 
-  .shoutbox--page {
-    width: 100%;
-    min-height: 70dvh;
+  @media (width < 62em) {
+    grid-template-columns: minmax(0, 1fr);
+
+    .shoutbox-side {
+      display: none;
+    }
   }
+}
+
+.shoutbox--page {
+  width: 100%;
+  min-height: 70dvh;
+}
+
+.shoutbox-side {
+  position: sticky;
+  top: calc(var(--header-offset, 4em) + 1em);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25em;
+}
+
+.shoutbox-side__card {
+  background: var(--secondary);
+  border: 1px solid var(--shoutbox-border);
+  border-radius: var(--shoutbox-radius);
+  padding: 1em;
+}
+
+.shoutbox-side__title {
+  font-weight: bold;
+  color: var(--primary);
+  margin-bottom: 0.6em;
+}
+
+.shoutbox-side__row {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  padding: 0.3em 0;
+
+  img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+}
+
+.shoutbox-side__name {
+  font-weight: bold;
+  color: var(--primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+    color: var(--tertiary);
+  }
+}
+
+.shoutbox-side__count {
+  margin-left: auto;
+  font-size: var(--font-down-2);
+  color: var(--primary-medium);
+  white-space: nowrap;
+}
+
+.shoutbox-side__text {
+  color: var(--primary-medium);
+  font-size: var(--font-down-1);
+  line-height: var(--line-height-medium);
+  margin: 0;
 }
 
 // De-card the page variant: a bordered timeline column, not a panel.
