@@ -436,30 +436,9 @@ function buildRow(widget, m, { animate = false } = {}) {
   time.textContent = relativeAge(date, { format: "tiny" });
   time.title = date.toLocaleString();
   line.appendChild(time);
-  main.appendChild(line);
 
-  const text = el("div", "shoutbox__text");
-  if (m.color) {
-    text.style.color = m.color;
-  }
-  renderRichText(text, esc(m.message));
-  main.appendChild(text);
-  li.appendChild(main);
-
-  const actions = el("div", "shoutbox__actions");
-
-  const reply = el("button", "shoutbox__action");
-  reply.type = "button";
-  reply.textContent = "↩";
-  reply.title = i18n("shoutbox.reply", { username: m.user?.username || "" });
-  reply.addEventListener("click", () => {
-    const ta = widget.els.composer;
-    if (ta) {
-      insertAtCursor(ta, `@${m.user?.username} `);
-    }
-  });
-  actions.appendChild(reply);
-
+  // memos-style: row-level actions sit at the right of the header line
+  const metaActions = el("span", "shoutbox__meta-actions");
   if (m.can_delete) {
     const del = el("button", "shoutbox__action shoutbox__action--delete");
     del.type = "button";
@@ -477,8 +456,59 @@ function buildRow(widget, m, { animate = false } = {}) {
           window.alert(err?.jqXHR?.responseJSON?.errors?.[0] || i18n("shoutbox.send_failed"));
         });
     });
-    actions.appendChild(del);
+    metaActions.appendChild(del);
   }
+  line.appendChild(metaActions);
+  main.appendChild(line);
+
+  const text = el("div", "shoutbox__text");
+  if (m.color) {
+    text.style.color = m.color;
+  }
+  renderRichText(text, esc(m.message));
+  main.appendChild(text);
+
+  // memos-style long content: clamp at 200px with a fade + show-more toggle
+  if (widget.variant === "page") {
+    text.classList.add("shoutbox__text--clamped");
+    requestAnimationFrame(() => {
+      if (widget.destroyed || text.scrollHeight <= 210) {
+        return;
+      }
+      const fade = el("div", "shoutbox__fade");
+      fade.setAttribute("aria-hidden", "true");
+      const more = el("button", "shoutbox__more");
+      more.type = "button";
+      more.textContent = i18n("shoutbox.show_more");
+      more.addEventListener("click", () => {
+        const expanded = text.classList.toggle("is-expanded");
+        fade.hidden = expanded;
+        more.textContent = i18n(expanded ? "shoutbox.show_less" : "shoutbox.show_more");
+      });
+      text.appendChild(fade);
+      main.appendChild(more);
+    });
+  }
+  li.appendChild(main);
+
+  // memos-style bottom action bar
+  const actions = el("div", "shoutbox__actions");
+
+  const reply = el("button", "shoutbox__action shoutbox__action--reply");
+  reply.type = "button";
+  reply.textContent = "↩ Reply";
+  reply.title = i18n("shoutbox.reply", { username: m.user?.username || "" });
+  reply.addEventListener("click", () => {
+    // on the panel the composer lives inside the ＋ popup — open it first
+    if (widget.els.plusBtn) {
+      widget.els.composePop.hidden = false;
+    }
+    const ta = widget.els.composer;
+    if (ta) {
+      insertAtCursor(ta, `@${m.user?.username} `);
+    }
+  });
+  actions.appendChild(reply);
   li.appendChild(actions);
 
   return li;

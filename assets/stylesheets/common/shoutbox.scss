@@ -137,6 +137,12 @@
   gap: 0.5em;
 }
 
+.shoutbox__meta-actions {
+  margin-left: auto;
+  display: inline-flex;
+  gap: 0.4em;
+}
+
 .shoutbox__name {
   font-weight: bold;
   font-size: var(--font-down-1);
@@ -168,7 +174,48 @@
 
   .shoutbox--page & {
     -webkit-line-clamp: unset;
-    overflow: visible;
+    display: block;
+    font-size: var(--font-0);
+    line-height: 1.45;
+  }
+}
+
+// memos-style long content: 200px clamp, fade, show-more
+.shoutbox__text--clamped {
+  max-height: 200px;
+  overflow: hidden;
+  position: relative;
+
+  &.is-expanded {
+    max-height: none;
+  }
+}
+
+.shoutbox__fade {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 3em;
+  background: linear-gradient(to top, var(--secondary) 30%, transparent);
+  pointer-events: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.shoutbox__more {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--tertiary);
+  cursor: pointer;
+  min-height: 2.2em;
+  padding: 0.2em 0;
+  font-size: var(--font-0);
+
+  &:hover {
+    text-decoration: underline;
   }
 }
 
@@ -198,9 +245,10 @@
 // ── row actions ──────────────────────────────────────────────────────────────
 .shoutbox__actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.25em;
-  flex-shrink: 0;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 0.4em;
 }
 
 .shoutbox__action {
@@ -637,7 +685,7 @@
 
 .shoutbox--page .shoutbox__item {
   display: grid;
-  grid-template-columns: 40px 1fr;
+  grid-template-columns: 32px 1fr;
   gap: 0 0.85em;
   padding: 0.9em 1em;
   border-bottom: 1px solid var(--shoutbox-border);
@@ -652,9 +700,11 @@
 }
 
 .shoutbox--page .shoutbox__avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   grid-row: 1;
+  border-radius: 0.65em; // memos squircle, not a circle
+  border: 1px solid var(--shoutbox-border);
 }
 
 .shoutbox--page .shoutbox__main {
@@ -662,21 +712,45 @@
   min-width: 0;
 }
 
-.shoutbox--page .shoutbox__text {
-  -webkit-line-clamp: unset;
-  overflow: visible;
+.shoutbox--page .shoutbox__meta-line {
+  font-size: var(--font-0);
+}
+
+.shoutbox--page .shoutbox__meta-actions .shoutbox__action {
+  font-size: var(--font-down-2);
+  padding: 0.2em 0.4em;
 }
 
 .shoutbox--page .shoutbox__actions {
   grid-column: 2;
-  flex-direction: row;
-  justify-content: flex-start;
-  gap: 2.5em;
+  gap: 1em;
   margin-top: 0.5em;
-  font-size: var(--font-up-1);
+}
 
-  .shoutbox__action {
-    font-size: inherit;
+.shoutbox--page .shoutbox__action {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--primary-medium);
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.4em 0.8em;
+  font-size: var(--font-0);
+  line-height: 1.3;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--primary-very-low);
+    color: var(--tertiary);
+  }
+
+  &--delete:hover {
+    color: var(--danger);
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 }
 
