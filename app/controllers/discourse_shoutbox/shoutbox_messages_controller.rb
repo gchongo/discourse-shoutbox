@@ -81,6 +81,7 @@ module DiscourseShoutbox
         signed_in: current_user.present?,
         can_post: current_user.present? && guardian.can_post_shoutbox?,
         max_length: SiteSetting.shoutbox_max_length,
+        avatar_template: current_user&.avatar_template,
       }
     end
 

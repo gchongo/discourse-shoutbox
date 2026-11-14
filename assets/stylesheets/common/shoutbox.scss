@@ -337,8 +337,11 @@
 }
 
 // ── popovers ─────────────────────────────────────────────────────────────────
+// Zero-height positioned wrap: popovers anchor to wherever the wrap sits —
+// widget bottom on the panel variant, right under the composer on the page.
 .shoutbox__popovers {
-  position: static;
+  position: relative;
+  height: 0;
 }
 
 .shoutbox__emoji-pop {
@@ -447,17 +450,147 @@
   margin-bottom: 1.5em;
 }
 
-// ── full page ────────────────────────────────────────────────────────────────
+// ── full page: X (twitter) style timeline ────────────────────────────────────
 // width: 100% is load-bearing — the wrap can land inside a grid/flex parent
 // (theme sidebar layouts) where a block child would otherwise shrink-to-fit.
 .shoutbox-page-wrap {
   width: 100%;
-  max-width: 46em;
+  max-width: 38em;
   margin: 1em auto 2em;
 
   .shoutbox--page {
     width: 100%;
     min-height: 70dvh;
+  }
+}
+
+// De-card the page variant: a bordered timeline column, not a panel.
+.shoutbox--page {
+  border-radius: 0;
+  border-top: none;
+  border-bottom: none;
+  border-inline: 1px solid var(--shoutbox-border);
+  background: var(--secondary);
+}
+
+.shoutbox--page .shoutbox__head {
+  position: sticky;
+  top: var(--header-offset, 4em);
+  z-index: z("dropdown") - 2;
+  background: var(--secondary);
+  padding: 0.85em 1em;
+  border-bottom: 1px solid var(--shoutbox-border);
+}
+
+.shoutbox--page .shoutbox__title {
+  font-size: var(--font-up-2);
+}
+
+// Composer on top, X-style: avatar, borderless input, circular send.
+.shoutbox--page .shoutbox__foot {
+  border-top: none;
+  border-bottom: 1px solid var(--shoutbox-border);
+  padding: 0.75em 1em 0.5em;
+}
+
+.shoutbox--page .shoutbox__composer-row {
+  align-items: flex-start;
+}
+
+.shoutbox__composer-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-right: 0.75em;
+}
+
+.shoutbox--page .shoutbox__composer {
+  border: none;
+  background: transparent;
+  font-size: var(--font-up-2);
+  padding: 0.3em 0;
+  min-height: 3.5em;
+  max-height: 12em;
+}
+
+.shoutbox--page .shoutbox__composer-meta {
+  padding-top: 0.3em;
+}
+
+.shoutbox--page .shoutbox__send {
+  border-radius: 50%;
+  width: 2.4em;
+  height: 2.4em;
+  padding: 0;
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  .d-icon {
+    width: 1.1em;
+    height: 1.1em;
+  }
+}
+
+// Popovers drop downward from the composer on the page variant.
+.shoutbox--page .shoutbox__emoji-pop,
+.shoutbox--page .shoutbox__mention-pop {
+  bottom: auto;
+  top: 0.4em;
+}
+
+// Timeline rows: hairline separated, hover highlight, actions under content.
+.shoutbox--page .shoutbox__list {
+  min-height: 40dvh;
+  height: auto;
+  overflow-y: visible;
+  padding: 0;
+}
+
+.shoutbox--page .shoutbox__item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 0 0.85em;
+  padding: 0.9em 1em;
+  border-bottom: 1px solid var(--shoutbox-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: var(--primary-very-low);
+  }
+}
+
+.shoutbox--page .shoutbox__avatar {
+  width: 40px;
+  height: 40px;
+  grid-row: 1;
+}
+
+.shoutbox--page .shoutbox__main {
+  grid-column: 2;
+  min-width: 0;
+}
+
+.shoutbox--page .shoutbox__text {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.shoutbox--page .shoutbox__actions {
+  grid-column: 2;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 2.5em;
+  margin-top: 0.5em;
+  font-size: var(--font-up-1);
+
+  .shoutbox__action {
+    font-size: inherit;
   }
 }
 

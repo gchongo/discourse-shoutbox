@@ -4,7 +4,7 @@ en:
       title: "Message Board"
       open: "Open the full message board"
       compose: "New message"
-      placeholder: "Say something…"
+      placeholder: "What's happening?"
       publish: "Post"
       posting: "Posting…"
       delete: "Delete this message"

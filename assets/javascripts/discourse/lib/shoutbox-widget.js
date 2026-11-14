@@ -313,15 +313,26 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
   // list
   const list = el("ul", "shoutbox__list");
   list.appendChild(el("li", "shoutbox__msg", "…"));
-  rootEl.appendChild(list);
   widget.els.list = list;
 
   // composer / login area — filled once the viewer payload arrives
   const foot = el("div", "shoutbox__foot");
-  rootEl.appendChild(foot);
   widget.els.foot = foot;
 
-  rootEl.appendChild(buildPopovers(widget));
+  const popovers = buildPopovers(widget);
+
+  if (variant === "page") {
+    // X-style timeline: composer on top, feed below. The zero-height popovers
+    // wrap sits right after the composer so the emoji/mention popovers anchor
+    // just underneath it.
+    rootEl.appendChild(foot);
+    rootEl.appendChild(popovers);
+    rootEl.appendChild(list);
+  } else {
+    rootEl.appendChild(list);
+    rootEl.appendChild(foot);
+    rootEl.appendChild(popovers);
+  }
 
   widget.refresh = ({ animateFromId = null } = {}) => {
     // initial load (null) never animates; catch-up animates what's new
@@ -520,6 +531,14 @@ function renderFoot(widget) {
 
 function buildComposerInto(widget, host) {
   const row = el("div", "shoutbox__composer-row");
+
+  // X-style page composer leads with the current user's avatar
+  if (widget.variant === "page" && viewer?.avatar_template) {
+    const av = el("img", "shoutbox__composer-avatar");
+    av.src = viewer.avatar_template.replace("{size}", "96");
+    av.alt = "";
+    row.appendChild(av);
+  }
 
   const emojiBtn = el("button", "shoutbox__composer-btn shoutbox__emoji-btn");
   emojiBtn.type = "button";
