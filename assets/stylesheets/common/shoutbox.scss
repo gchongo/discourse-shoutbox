@@ -423,8 +423,9 @@
     margin: 0.75em 0.5em;
   }
 
-  .shoutbox__list,
-  .shoutbox--page .shoutbox__list {
+  // 200px cap is for the panel variant only — the full page keeps its
+  // dvh-based height so it fills the screen instead of collapsing to half.
+  .shoutbox--panel .shoutbox__list {
     height: 200px;
   }
 
