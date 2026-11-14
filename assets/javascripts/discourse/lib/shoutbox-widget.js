@@ -10,8 +10,13 @@ import { ajax } from "discourse/lib/ajax";
 import { iconHTML } from "discourse/lib/icon-library";
 import { i18n } from "discourse-i18n";
 import { relativeAge } from "discourse/lib/formatter";
+import DiscourseURL from "discourse/lib/url";
 
 const container = () => window.Discourse?.__container__;
+
+// The jtech theme's expand icon (same markup as the theme's jt-card__peek).
+const JT_EXPAND_SVG =
+  '<svg class="fa d-icon d-icon-expand svg-icon fa-width-auto svg-string" width="1em" height="1em" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><use href="#jt-expand"></use></svg>';
 
 // ── shared store ─────────────────────────────────────────────────────────────
 
@@ -277,10 +282,31 @@ export function mountShoutbox(rootEl, { variant = "panel" } = {}) {
   const head = el("div", "shoutbox__head");
   head.appendChild(el("span", "shoutbox__title", `📝 ${i18n("shoutbox.title")}`));
   if (variant === "panel") {
-    const open = el("a", "shoutbox__open", i18n("shoutbox.open"));
-    open.href = "/shoutbox";
+    // Full page: the jtech theme's Quick-look expand icon (jt sprite).
+    const open = el("button", "btn btn-flat no-text jt-card__peek shoutbox__open");
+    open.type = "button";
+    open.title = i18n("shoutbox.open");
     open.setAttribute("aria-label", i18n("shoutbox.open"));
+    open.innerHTML = JT_EXPAND_SVG;
+    open.addEventListener("click", () => DiscourseURL.routeTo("/shoutbox"));
     head.appendChild(open);
+
+    // New message: hidden until the viewer payload proves posting rights.
+    const plus = el("button", "btn btn-flat no-text shoutbox__compose-toggle");
+    plus.type = "button";
+    plus.title = i18n("shoutbox.compose");
+    plus.setAttribute("aria-label", i18n("shoutbox.compose"));
+    plus.innerHTML = iconHTML("plus");
+    plus.hidden = true;
+    plus.addEventListener("click", () => {
+      const pop = widget.els.composePop;
+      pop.hidden = !pop.hidden;
+      if (!pop.hidden) {
+        widget.els.composer?.focus();
+      }
+    });
+    widget.els.plusBtn = plus;
+    head.appendChild(plus);
   }
   rootEl.appendChild(head);
 
@@ -460,6 +486,21 @@ function renderFoot(widget) {
     return;
   }
   widget.els.footSig = sig;
+
+  // Panel variant: no inline composer at all. The head's ＋ button toggles the
+  // compose popup; the expand button goes to the full page. Anon/not-allowed
+  // is expressed by hiding ＋ entirely.
+  if (widget.variant === "panel") {
+    foot.replaceChildren();
+    if (widget.els.plusBtn) {
+      widget.els.plusBtn.hidden = !(viewer && viewer.can_post);
+    }
+    if (viewer && viewer.can_post) {
+      buildComposerInto(widget, widget.els.composePop);
+    }
+    return;
+  }
+
   foot.replaceChildren();
 
   if (viewer && !viewer.signed_in) {
@@ -474,6 +515,10 @@ function renderFoot(widget) {
     return;
   }
 
+  buildComposerInto(widget, foot);
+}
+
+function buildComposerInto(widget, host) {
   const row = el("div", "shoutbox__composer-row");
 
   const emojiBtn = el("button", "shoutbox__composer-btn shoutbox__emoji-btn");
@@ -495,9 +540,10 @@ function renderFoot(widget) {
   send.title = i18n("shoutbox.publish");
   send.setAttribute("aria-label", i18n("shoutbox.publish"));
   send.innerHTML = iconHTML("paper-plane");
+  widget.els.sendBtn = send;
   row.appendChild(send);
 
-  foot.appendChild(row);
+  host.appendChild(row);
 
   const meta = el("div", "shoutbox__composer-meta");
   const count = el("span", "shoutbox__count");
@@ -512,7 +558,7 @@ function renderFoot(widget) {
   updateCount();
   ta.addEventListener("input", updateCount);
   meta.appendChild(count);
-  foot.appendChild(meta);
+  host.appendChild(meta);
 
   const emojiPop = widget.rootEl.querySelector(".shoutbox__emoji-pop");
   emojiBtn.addEventListener("click", () => {
@@ -656,7 +702,7 @@ function renderFoot(widget) {
 
 function submit(widget) {
   const ta = widget.els.composer;
-  const send = widget.els.foot.querySelector(".shoutbox__send");
+  const send = widget.els.sendBtn;
   const text = ta.value.trim();
   if (!text || send.disabled) {
     return;
@@ -693,8 +739,12 @@ function buildPopovers(widget) {
   emojiPop.hidden = true;
   const mentionPop = el("div", "shoutbox__mention-pop");
   mentionPop.hidden = true;
+  const composePop = el("div", "shoutbox__compose-pop");
+  composePop.hidden = true;
+  widget.els.composePop = composePop;
   wrap.appendChild(emojiPop);
   wrap.appendChild(mentionPop);
+  wrap.appendChild(composePop);
 
   widget.rootEl.addEventListener("click", (event) => {
     if (
@@ -703,6 +753,13 @@ function buildPopovers(widget) {
       !event.target.closest(".shoutbox__emoji-btn")
     ) {
       emojiPop.hidden = true;
+    }
+    if (
+      !composePop.hidden &&
+      !event.target.closest(".shoutbox__compose-pop") &&
+      !event.target.closest(".shoutbox__compose-toggle")
+    ) {
+      composePop.hidden = true;
     }
   });
 

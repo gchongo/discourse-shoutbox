@@ -21,6 +21,7 @@ register_asset "stylesheets/common/shoutbox.scss"
 
 register_svg_icon "paper-plane"
 register_svg_icon "face-smile"
+register_svg_icon "plus"
 register_svg_icon "xmark"
 register_svg_icon "arrow-up-right-from-square"
 

@@ -2,7 +2,8 @@ en:
   js:
     shoutbox:
       title: "Message Board"
-      open: "Open"
+      open: "Open the full message board"
+      compose: "New message"
       placeholder: "Say something…"
       publish: "Post"
       posting: "Posting…"
