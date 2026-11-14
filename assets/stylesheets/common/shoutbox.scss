@@ -313,6 +313,11 @@
   border: 1px solid var(--primary-low-mid);
   border-radius: 0.5em;
   box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+
+  // the hidden attribute alone can't win against the display: grid above
+  &[hidden] {
+    display: none;
+  }
 }
 
 .shoutbox__emoji-option {
@@ -339,6 +344,10 @@
   border-radius: 0.5em;
   box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
   overflow: hidden;
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .shoutbox__mention-option {
@@ -395,11 +404,15 @@
 }
 
 // ── full page ────────────────────────────────────────────────────────────────
+// width: 100% is load-bearing — the wrap can land inside a grid/flex parent
+// (theme sidebar layouts) where a block child would otherwise shrink-to-fit.
 .shoutbox-page-wrap {
+  width: 100%;
   max-width: 46em;
   margin: 1em auto 2em;
 
   .shoutbox--page {
+    width: 100%;
     min-height: 70dvh;
   }
 }
