@@ -2,10 +2,10 @@
 
 module DiscourseShoutbox
   class ShoutboxMessagesController < ::ApplicationController
-    requires_plugin PLUGIN_NAME
+    requires_plugin "discourse-shoutbox"
 
     before_action :ensure_shoutbox_enabled
-    before_action :ensure_logged_in, only: %i[create destroy]
+    before_action :ensure_logged_in, only: %i[create update destroy like pin upload]
 
     # HTML requests (GET /shoutbox) serve the Ember app shell — the frontend
     # route-map turns the URL into the full-page board. JSON requests get data.
@@ -17,16 +17,65 @@ module DiscourseShoutbox
       end
     end
 
+    # Single message + its replies — powers the /shoutbox/m/:id detail page.
+    def show
+      return raise Discourse::InvalidAccess if current_user.blank? && !SiteSetting.shoutbox_anonymous_view
+
+      message = ShoutboxMessage.find_by(id: params[:id])
+      raise Discourse::NotFound unless message
+
+      # the whole conversation tree under this message (nested replies too)
+      replies =
+        ShoutboxMessage.where(
+          "id IN (
+             WITH RECURSIVE tree AS (
+               SELECT id FROM shoutbox_messages WHERE reply_to_id = :root
+               UNION ALL
+               SELECT sm.id FROM shoutbox_messages sm
+                 JOIN tree t ON sm.reply_to_id = t.id
+             )
+             SELECT id FROM tree
+           )",
+          root: message.id,
+        ).order(id: :desc)
+
+      render json: {
+        message: serialize_messages(message),
+        replies: serialize_messages(replies),
+        viewer: viewer_payload,
+      }
+    end
+
     def list
       return raise Discourse::InvalidAccess if current_user.blank? && !SiteSetting.shoutbox_anonymous_view
 
+      @tag_filter = params[:tag].to_s.presence
+
+      base =
+        if @tag_filter
+          ShoutboxMessage.where("? = ANY (tags)", @tag_filter)
+        else
+          ShoutboxMessage.all
+        end
+
       messages =
         if (after_id = params[:after_id].to_i).positive?
-          ShoutboxMessage.where("id > ?", after_id).order(:id).limit(
+          base.where("id > ?", after_id).order(:id).limit(
             SiteSetting.shoutbox_messages_displayed,
           )
         else
-          ShoutboxMessage.recent.limit(SiteSetting.shoutbox_messages_displayed).reverse
+          top =
+            (
+              base.where(pinned: true, reply_to_id: nil).recent.limit(
+                SiteSetting.shoutbox_messages_displayed,
+              ).reverse +
+                base.where(pinned: false, reply_to_id: nil).recent.limit(
+                  SiteSetting.shoutbox_messages_displayed,
+                ).reverse
+            )
+          replies =
+            top.empty? ? [] : ShoutboxMessage.where(reply_to_id: top.map(&:id)).order(:id).to_a
+          (top + replies).sort_by(&:id)
         end
 
       render json: {
@@ -47,6 +96,13 @@ module DiscourseShoutbox
 
       message = ShoutboxMessage.new(user: current_user, message: params[:message].to_s.strip, color: sanitize_color)
 
+      # attach the reply to its ACTUAL target — replies to comments keep
+      # their own parent so the detail page can draw the X-style
+      # relationship line between the two avatars
+      if (reply_to_id = params[:reply_to_id].to_i).positive?
+        message.reply_to_id = ShoutboxMessage.find_by(id: reply_to_id)&.id
+      end
+
       if message.save
         serialized = serialize_messages(message)
         MessageBus.publish(
@@ -54,10 +110,152 @@ module DiscourseShoutbox
           { type: "created", message: serialized },
         )
         ShoutboxMessage.trim_overflow!
+
+        # notifications: parent author for replies, @mentions otherwise
+        notified_ids = [current_user.id]
+        if message.reply_to_id.present?
+          DiscourseShoutbox.notify!(message.reply_to.user, :shoutbox_reply, current_user, message)
+          notified_ids << message.reply_to.user_id
+        end
+        message.message.scan(/@([a-zA-Z0-9_\-.]+)/).flatten.map(&:downcase).uniq.each do |name|
+          mentioned = User.find_by(username_lower: name)
+          next if mentioned.nil? || notified_ids.include?(mentioned.id)
+          DiscourseShoutbox.notify!(mentioned, :shoutbox_mention, current_user, message)
+          notified_ids << mentioned.id
+        end
+
         render json: { message: serialized }
       else
         render_json_error(message)
       end
+    end
+
+    # Composer image upload: stores the file through Discourse's own Upload
+    # pipeline (size/type limits, SHA dedup, CDN) and hands back its
+    # upload:// short URL. The client embeds it as standard image markdown —
+    # no shoutbox-specific storage or columns.
+    def upload
+      return render_json_error(I18n.t("shoutbox.not_allowed")) unless guardian.can_post_shoutbox?
+
+      RateLimiter.new(current_user, "shoutbox-upload", 10, 1.minute).performed!
+
+      file = params[:file]
+      return render_json_error(I18n.t("shoutbox.upload_failed")) if file.blank?
+
+      begin
+        upload =
+          UploadCreator.new(
+            file.tempfile,
+            file.original_filename,
+            type: "shoutbox",
+            for_site_setting: true,
+          ).create_for(current_user.id)
+
+        if upload.errors.empty?
+          render json: {
+            short_url: upload.short_url,
+            url: upload.url,
+            width: upload.width,
+            height: upload.height,
+            original_filename: upload.original_filename,
+          }
+        else
+          render_json_error(upload.errors.full_messages.join("\n"))
+        end
+      rescue => e
+        # Logster doesn't write production_errors.log on this setup — land the
+        # backtrace in production.log so upload failures are diagnosable.
+        Rails.logger.error(
+          "Shoutbox upload failed: #{e.class}: #{e.message}\n" +
+            e.backtrace.first(15).join("\n"),
+        )
+        render_json_error(I18n.t("shoutbox.upload_failed"))
+      end
+    end
+
+    def update
+      message = ShoutboxMessage.find_by(id: params[:id])
+      raise Discourse::NotFound unless message
+      raise Discourse::InvalidAccess unless message.user_id == current_user.id
+
+      message.message = params[:message].to_s.strip
+      message.edited_at = Time.zone.now
+
+      if message.save
+        serialized = serialize_messages(message)
+        MessageBus.publish(
+          DiscourseShoutbox::MESSAGE_BUS_CHANNEL,
+          { type: "updated", message: serialized },
+        )
+        render json: { message: serialized }
+      else
+        render_json_error(message)
+      end
+    end
+
+    def like
+      message = ShoutboxMessage.find_by(id: params[:id])
+      raise Discourse::NotFound unless message
+
+      like = ShoutboxLike.find_by(user: current_user, shoutbox_message: message)
+      if like
+        like.destroy
+        message.decrement!(:like_count)
+        liked = false
+      else
+        ShoutboxLike.create!(user: current_user, shoutbox_message: message)
+        message.increment!(:like_count)
+        liked = true
+      end
+
+      MessageBus.publish(
+        DiscourseShoutbox::MESSAGE_BUS_CHANNEL,
+        {
+          type: "liked",
+          id: message.id,
+          like_count: message.like_count,
+          liked: liked,
+        },
+      )
+      if liked
+        DiscourseShoutbox.notify!(message.user, :shoutbox_like, current_user, message)
+      end
+      render json: { like_count: message.like_count, liked: liked }
+    end
+
+    def pin
+      raise Discourse::InvalidAccess unless current_user&.staff?
+
+      message = ShoutboxMessage.find_by(id: params[:id])
+      raise Discourse::NotFound unless message
+
+      message.update!(pinned: !message.pinned)
+      MessageBus.publish(
+        DiscourseShoutbox::MESSAGE_BUS_CHANNEL,
+        { type: "pinned", id: message.id, pinned: message.pinned },
+      )
+      render json: success_json.merge(pinned: message.pinned)
+    end
+
+    # Fire-and-forget impression counter: the client posts it once per
+    # message per session when the row first scrolls into view.
+    def view
+      message = ShoutboxMessage.find_by(id: params[:id])
+      raise Discourse::NotFound unless message
+
+      message.increment!(:views)
+      render json: success_json.merge(views: message.views)
+    end
+
+    def tags
+      rows =
+        ShoutboxMessage
+          .joins("CROSS JOIN unnest(tags) AS tag")
+          .group("tag")
+          .select("tag, COUNT(*) AS count")
+          .order("count DESC")
+          .limit(30)
+      render json: { tags: rows.map { |r| { name: r.tag, count: r.count } } }
     end
 
     def destroy
@@ -73,7 +271,7 @@ module DiscourseShoutbox
     private
 
     def ensure_shoutbox_enabled
-      raise Discourse::InvalidAccess unless SiteSetting.shoutbox_enabled
+      raise Discourse::InvalidAccess unless DiscourseShoutbox.enabled?
     end
 
     def viewer_payload
@@ -82,6 +280,8 @@ module DiscourseShoutbox
         can_post: current_user.present? && guardian.can_post_shoutbox?,
         max_length: SiteSetting.shoutbox_max_length,
         avatar_template: current_user&.avatar_template,
+        username: current_user&.username,
+        staff: current_user&.staff? || false,
       }
     end
 

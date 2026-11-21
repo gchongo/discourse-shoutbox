@@ -11,3 +11,4 @@ en:
     shoutbox_rate_limit_per_minute: "How many messages a user can post per minute."
   shoutbox:
     not_allowed: "You are not allowed to post messages here."
+    upload_failed: "Image upload failed. Try a different file."
