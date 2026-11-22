@@ -1,5 +1,9 @@
 en:
   js:
+    admin:
+      site_settings:
+        categories:
+          shoutbox: "Shoutbox"
     shoutbox:
       title: "Moments"
       open: "Open the full message board"
