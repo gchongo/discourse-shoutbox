@@ -2737,16 +2737,23 @@
   cursor: pointer;
 }
 
-// avatar links: the user-card trigger anchors (match the topic list's
-// structure so the card positions correctly next to the avatar)
-.shoutbox__author-avatar-link,
-.shoutbox__reply-avatar-link,
-.shoutbox__detail-reply-avatar-link {
-  display: block;
-  flex-shrink: 0;
+
+// avatars open the user card on click (data-user-card, core's global
+// click handler) — the same behavior as the topic list
+.shoutbox__author-avatar[data-user-card],
+.shoutbox__reply-avatar[data-user-card],
+.shoutbox__detail-reply-avatar[data-user-card],
+.shoutbox-detail__avatar[data-user-card] {
+  cursor: pointer;
 }
 
-.shoutbox-detail__avatar-link {
-  display: block;
-  flex-shrink: 0;
+// ── user card: fixed centered position — floating-ui's anchoring to the
+// clicked avatar is unreliable inside the shoutbox containers (the card
+// lands at the page's top-left); a fixed centered spot is predictable ──
+#user-card {
+  position: fixed !important;
+  top: 64px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
 }

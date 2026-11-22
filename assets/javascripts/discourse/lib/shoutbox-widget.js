@@ -988,16 +988,8 @@ function buildRow(widget, m, { animate = false, isReply = false } = {}) {
     av.src = avatarSrc(m, 48);
     av.alt = "";
     av.loading = "lazy";
-    if (m.user?.username) {
-      av.setAttribute("data-user-card", m.user.username);
-      const avLink = el("a", "shoutbox__author-avatar-link");
-      avLink.setAttribute("data-user-card", m.user.username);
-      avLink.href = "/u/" + m.user.username;
-      avLink.appendChild(av);
-      main.appendChild(avLink);
-    } else {
-      main.appendChild(av);
-    }
+    if (m.user?.username) av.setAttribute("data-user-card", m.user.username);
+    main.appendChild(av);
   }
   const col = el("div", "shoutbox__card-main-col");
 
@@ -1416,16 +1408,8 @@ function openReplyModal(widget, m, opts = {}) {
     const img = el("img", "shoutbox__reply-avatar");
     img.src = parent.user.avatar_template.replace("{size}", "96");
     img.alt = "";
-    if (parent.user?.username) {
-      img.setAttribute("data-user-card", parent.user.username);
-      const avLink = el("a", "shoutbox__reply-avatar-link");
-      avLink.setAttribute("data-user-card", parent.user.username);
-      avLink.href = "/u/" + parent.user.username;
-      avLink.appendChild(img);
-      rail.appendChild(avLink);
-    } else {
-      rail.appendChild(img);
-    }
+    if (parent.user?.username) img.setAttribute("data-user-card", parent.user.username);
+    rail.appendChild(img);
   }
   rail.appendChild(el("span", "shoutbox__reply-line"));
   thread.appendChild(rail);
@@ -2625,16 +2609,8 @@ function buildDetailReply(m, onReply) {
     img.src = m.user.avatar_template.replace("{size}", "48");
     img.alt = "";
     img.loading = "lazy";
-    if (m.user?.username) {
-      img.setAttribute("data-user-card", m.user.username);
-      const avLink = el("a", "shoutbox__detail-reply-avatar-link");
-      avLink.setAttribute("data-user-card", m.user.username);
-      avLink.href = "/u/" + m.user.username;
-      avLink.appendChild(img);
-      row.appendChild(avLink);
-    } else {
-      row.appendChild(img);
-    }
+    if (m.user?.username) img.setAttribute("data-user-card", m.user.username);
+    row.appendChild(img);
   }
   const main = el("div", "shoutbox__detail-reply-main");
   const meta = el("div", "shoutbox__detail-reply-meta");
@@ -2867,16 +2843,8 @@ export function mountShoutboxDetail(rootEl, { id }) {
       img.src = m.user.avatar_template.replace("{size}", "96");
       img.alt = "";
       img.loading = "lazy";
-      if (m.user?.username) {
-        img.setAttribute("data-user-card", m.user.username);
-        const avLink = el("a", "shoutbox-detail__avatar-link");
-        avLink.setAttribute("data-user-card", m.user.username);
-        avLink.href = "/u/" + m.user.username;
-        avLink.appendChild(img);
-        grid.appendChild(avLink);
-      } else {
-        grid.appendChild(img);
-      }
+      if (m.user?.username) img.setAttribute("data-user-card", m.user.username);
+      grid.appendChild(img);
     }
     const cardCol = el("div", "shoutbox__card-main-col");
     const who = el("div", "shoutbox-detail__who");
