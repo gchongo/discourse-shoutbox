@@ -1141,6 +1141,9 @@
   flex: 1 1 auto;
   width: 2px;
   min-height: 1.5em;
+  // the lineage line ends at the reply avatar — it must not run beside the
+  // compose bar now that the compose is pulled onto the avatar axis
+  margin-bottom: 5.25em;
   margin: 3px 0;
   background: var(--jt-border, var(--primary-low));
 }
@@ -1245,7 +1248,7 @@
   grid-column: 1 / -1;
   grid-row: 3;
   flex: 1 1 100%;
-  justify-content: flex-start;
+  justify-content: center;
   margin-left: 0;
 }
 
