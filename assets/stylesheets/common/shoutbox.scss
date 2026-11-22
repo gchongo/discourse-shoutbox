@@ -62,7 +62,7 @@
   align-items: center;
   justify-content: center;
   padding: 0.3em 0.45em;
-  border-radius: 0.4em;
+  border-radius: var(--jt-radius-field);
   flex-shrink: 0;
   font-size: var(--font-up-1);
 
@@ -281,7 +281,7 @@
 .shoutbox--page > .shoutbox__foot.jt-card__foot {
   background: var(--jt-surface-raised);
   border: 1px solid var(--jt-border, var(--primary-low));
-  border-radius: 1em;
+  border-radius: var(--jt-radius-lg);
   // breathing room between the composer card and the first message card
   margin-bottom: 0.9em;
 }
@@ -381,7 +381,7 @@
 
   &::-webkit-scrollbar-thumb {
     background: var(--jt-border-strong, var(--primary-low-mid));
-    border-radius: 999px;
+    border-radius: var(--jt-radius-pill);
   }
 
   &::-webkit-scrollbar-track {
@@ -416,7 +416,7 @@
   border: 1px solid var(--jt-border, var(--primary-low));
   border-radius: var(--jt-radius-sm, 0.5em);
   padding: 0.3em;
-  box-shadow: 0 0.4em 1.2em rgba(0, 0, 0, 0.35);
+  box-shadow: var(--jt-shadow-modal);
 
   &[hidden] {
     display: none;
@@ -436,7 +436,7 @@
   color: var(--shoutbox-text);
   font-size: var(--font-0);
   padding: 0.35em 0.6em;
-  border-radius: 0.35em;
+  border-radius: var(--jt-radius-field);
   cursor: pointer;
 
   &:hover {
@@ -457,7 +457,7 @@
   cursor: pointer;
   width: 34px;
   height: 34px;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -525,10 +525,10 @@
   left: 0.6em;
   right: 0.6em;
   z-index: z("dropdown") + 2;
-  background: var(--secondary);
-  border: 1px solid var(--primary-low-mid);
-  border-radius: 0.6em;
-  box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+  background: var(--jt-surface-raised, var(--secondary));
+  border: 1px solid var(--jt-border, var(--primary-low-mid));
+  border-radius: var(--jt-radius-md);
+  box-shadow: var(--jt-shadow-menu);
   padding: 0.5em;
 
   &[hidden] {
@@ -569,10 +569,10 @@
   max-width: calc(100% - 1.2em);
   max-height: 12em;
   overflow-y: auto;
-  background: var(--secondary);
-  border: 1px solid var(--primary-low-mid);
-  border-radius: 0.5em;
-  box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+  background: var(--jt-surface-raised, var(--secondary));
+  border: 1px solid var(--jt-border, var(--primary-low-mid));
+  border-radius: var(--jt-radius-sm);
+  box-shadow: var(--jt-shadow-menu);
 
   // the hidden attribute alone can't win against the display: grid above
   &[hidden] {
@@ -599,10 +599,10 @@
   left: 3.2em;
   right: 0.6em;
   z-index: z("dropdown") + 1;
-  background: var(--secondary);
-  border: 1px solid var(--primary-low-mid);
-  border-radius: 0.5em;
-  box-shadow: var(--shadow-menu-panel, 0 0.5em 1.5em rgba(0, 0, 0, 0.25));
+  background: var(--jt-surface-raised, var(--secondary));
+  border: 1px solid var(--jt-border, var(--primary-low-mid));
+  border-radius: var(--jt-radius-sm);
+  box-shadow: var(--jt-shadow-menu);
   overflow: hidden;
 
   &[hidden] {
@@ -635,7 +635,7 @@
   img {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--jt-radius-avatar);
     flex-shrink: 0;
   }
 
@@ -716,7 +716,7 @@
 
   &::-webkit-scrollbar-thumb {
     background: var(--jt-border-strong, var(--primary-low-mid));
-    border-radius: 999px;
+    border-radius: var(--jt-radius-pill);
   }
 
   &::-webkit-scrollbar-track {
@@ -725,9 +725,9 @@
 }
 
 .shoutbox-side__card {
-  background: var(--secondary);
+  background: var(--jt-surface-raised, var(--secondary));
   border: 1px solid var(--jt-border, var(--primary-low));
-  border-radius: 1em;
+  border-radius: var(--jt-radius-lg);
   padding: 1em;
 }
 
@@ -745,9 +745,9 @@
   position: relative;
   display: flex;
   align-items: center;
-  background: var(--secondary);
+  background: var(--jt-surface-raised, var(--secondary));
   border: 1px solid var(--jt-border, var(--primary-low));
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   transition: box-shadow 0.15s ease;
 
   &:focus-within {
@@ -808,7 +808,7 @@
   text-align: left;
   background: none;
   border: none;
-  border-radius: 0.5em;
+  border-radius: var(--jt-radius-sm);
   padding: 0.7em 0.5em;
   cursor: pointer;
 
@@ -897,7 +897,7 @@
   img {
     width: 24px;
     height: 24px;
-    border-radius: 50%;
+    border-radius: var(--jt-radius-avatar);
     flex-shrink: 0;
   }
 }
@@ -926,7 +926,7 @@
   font-size: var(--font-down-2);
   font-weight: 600;
   padding: 0.25em 0.8em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   cursor: pointer;
   margin-left: auto;
   flex-shrink: 0;
@@ -964,14 +964,14 @@
 .shoutbox--page {
   border: none;
   border-radius: 0;
-  background: var(--secondary);
+  background: var(--jt-surface-raised, var(--secondary));
 }
 
 .shoutbox--page .shoutbox__head {
   position: sticky;
   top: var(--header-offset, 4em);
   z-index: z("dropdown") - 2;
-  background: var(--secondary);
+  background: var(--jt-surface-raised, var(--secondary));
   padding: 0.85em 1em;
   border-bottom: 1px solid var(--shoutbox-border);
 }
@@ -1010,7 +1010,7 @@
   img {
     max-width: 92vw;
     max-height: 88vh;
-    border-radius: 0.5em;
+    border-radius: var(--jt-radius-sm);
     object-fit: contain;
     box-shadow: 0 0.5em 2em rgba(0, 0, 0, 0.6);
   }
@@ -1034,7 +1034,7 @@
   border: none;
   width: 2.6em;
   height: 2.6em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 1.4em;
@@ -1066,7 +1066,7 @@
   border: none;
   width: 2.4em;
   height: 2.4em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   cursor: pointer;
@@ -1107,7 +1107,7 @@
   flex-direction: column;
   background: var(--jt-surface-raised, var(--secondary));
   border: 1px solid var(--jt-border, var(--primary-low));
-  border-radius: 1em;
+  border-radius: var(--jt-radius-lg);
   padding: 1.15em 1.3em 1.2em;
 }
 
@@ -1154,7 +1154,7 @@
 .shoutbox__reply-my-avatar {
   width: 2.4em;
   height: 2.4em;
-  border-radius: 50%;
+  border-radius: var(--jt-radius-avatar);
   flex-shrink: 0;
 }
 
@@ -1281,7 +1281,7 @@
   border: 1px solid var(--jt-border, var(--primary-low));
   border-radius: var(--jt-radius-sm, 0.5em);
   padding: 0.4em;
-  box-shadow: 0 0.4em 1.2em rgba(0, 0, 0, 0.35);
+  box-shadow: var(--jt-shadow-modal);
 
   &[hidden] {
     display: none;
@@ -1320,7 +1320,7 @@
     height: auto;
     max-height: 85dvh;
     overflow-y: auto;
-    border-radius: 1em;
+    border-radius: var(--jt-radius-lg);
     border: 1px solid var(--jt-border, var(--primary-low));
   }
 
@@ -1422,7 +1422,7 @@
   justify-content: center;
   width: 2.2em;
   height: 2.2em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   color: var(--shoutbox-text);
   text-decoration: none;
 
@@ -1464,7 +1464,7 @@
 }
 
 .shoutbox-detail__avatar {
-  border-radius: 50%;
+  border-radius: var(--jt-radius-avatar);
   flex-shrink: 0;
 }
 
@@ -1631,7 +1631,7 @@
 .shoutbox__detail-compose-avatar {
   width: 2.4em;
   height: 2.4em;
-  border-radius: 50%;
+  border-radius: var(--jt-radius-avatar);
   flex-shrink: 0;
 }
 
@@ -1754,7 +1754,7 @@
 .shoutbox__detail-reply-avatar {
   width: 2.2em;
   height: 2.2em;
-  border-radius: 50%;
+  border-radius: var(--jt-radius-avatar);
   flex-shrink: 0;
 }
 
@@ -1875,7 +1875,7 @@
   background: transparent;
   color: var(--primary-medium);
   cursor: pointer;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   padding: 0.4em 0.8em;
   font-size: var(--font-0);
   line-height: 1.3;
@@ -2042,7 +2042,7 @@
   background: var(--shoutbox-surface);
   border: 1px solid var(--shoutbox-border);
   border-radius: var(--jt-radius-md, 0.5em);
-  box-shadow: 0 0.5em 1.5em rgba(0, 0, 0, 0.3);
+  box-shadow: var(--jt-shadow-menu);
   padding: 0.3em;
 }
 
@@ -2219,7 +2219,7 @@
   font-size: var(--font-0);
   cursor: pointer;
   padding: 0.4em 0.8em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   transition: background 0.15s ease, color 0.15s ease;
 
   &:hover {
@@ -2523,7 +2523,7 @@
   border: none;
   width: 2.2em;
   height: 2.2em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
   font-size: 1.3em;
@@ -2634,7 +2634,7 @@
   border: none;
   width: 1.9em;
   height: 1.9em;
-  border-radius: 999px;
+  border-radius: var(--jt-radius-pill);
   background: rgba(0, 0, 0, 0.65);
   color: #fff;
   cursor: pointer;
@@ -2665,3 +2665,17 @@
   padding-left: 0.2em;
 }
 
+
+// ── forum tags: # prefix, no pill background (unified with the sidebar) ──
+// migrated from the admin CSS box — applies site-wide (topic lists, topic
+// pages, tag dropdowns), not just inside shoutbox surfaces
+.discourse-tag::before {
+  content: "#";
+  opacity: 0.7;
+  margin-right: 0.3em;
+}
+.discourse-tag.box {
+  background: none;
+  padding: 0;
+  border-radius: 0;
+}
