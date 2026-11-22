@@ -988,6 +988,7 @@ function buildRow(widget, m, { animate = false, isReply = false } = {}) {
     av.src = avatarSrc(m, 48);
     av.alt = "";
     av.loading = "lazy";
+    if (m.user?.username) av.setAttribute("data-user-card", m.user.username);
     main.appendChild(av);
   }
   const col = el("div", "shoutbox__card-main-col");
@@ -1407,6 +1408,7 @@ function openReplyModal(widget, m, opts = {}) {
     const img = el("img", "shoutbox__reply-avatar");
     img.src = parent.user.avatar_template.replace("{size}", "96");
     img.alt = "";
+    if (parent.user?.username) img.setAttribute("data-user-card", parent.user.username);
     rail.appendChild(img);
   }
   rail.appendChild(el("span", "shoutbox__reply-line"));
@@ -2607,6 +2609,7 @@ function buildDetailReply(m, onReply) {
     img.src = m.user.avatar_template.replace("{size}", "48");
     img.alt = "";
     img.loading = "lazy";
+    if (m.user?.username) img.setAttribute("data-user-card", m.user.username);
     row.appendChild(img);
   }
   const main = el("div", "shoutbox__detail-reply-main");

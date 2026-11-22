@@ -1144,9 +1144,6 @@
   // the lineage line ends at the reply avatar — it must not run beside the
   // compose bar now that the compose is pulled onto the avatar axis
   margin-bottom: 5.25em;
-  // the lineage line ends at the reply avatar — it must not run beside the
-  // compose bar now that the compose is pulled onto the avatar axis
-  margin-bottom: 5.25em;
   margin: 3px 0;
   background: var(--jt-border, var(--primary-low));
 }
@@ -2729,4 +2726,13 @@
   background: none;
   padding: 0;
   border-radius: 0;
+}
+
+// avatars open the user card on click (data-user-card, core's global
+// click handler) — the same behavior as the topic list
+.shoutbox__author-avatar,
+.shoutbox__reply-avatar,
+.shoutbox__detail-reply-avatar,
+.shoutbox__reply-my-avatar {
+  cursor: pointer;
 }
