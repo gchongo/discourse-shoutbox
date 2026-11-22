@@ -960,11 +960,14 @@
   margin: 0;
 }
 
-// De-card the page variant: no frame at all — just the feed on the page.
+// De-card the page variant: no frame at all — just the feed sitting
+// directly on the page surface. Transparent (not surface-raised): on the
+// OLED dark palettes the raised tone is a shade lighter than the page and
+// read as a stray rectangle behind every card.
 .shoutbox--page {
   border: none;
   border-radius: 0;
-  background: var(--jt-surface-raised, var(--secondary));
+  background: transparent;
 }
 
 .shoutbox--page .shoutbox__head {
